@@ -1,18 +1,18 @@
-name: Scrape Real Estate Listing
+name: Enhanced Property Analysis
 on:
   workflow_dispatch:
     inputs:
       listing_url:
-        description: 'URL of real estate listing'
+        description: 'Property listing URL'
         required: true
       client_email:
         description: 'Client email for report'
         required: false
   repository_dispatch:
-    types: [scrape-listing]
+    types: [enhanced-analysis]
 
 jobs:
-  scrape-and-process:
+  enhanced-analysis:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -23,40 +23,57 @@ jobs:
         with:
           python-version: '3.10'
           
-      - name: Install scraping dependencies
+      - name: Install enhanced dependencies
         run: |
           cd process
           pip install -r requirements.txt
+          # Additional packages for enhanced features
+          pip install pillow matplotlib
           
-      - name: Scrape listing data
+      - name: Run enhanced scraper
         env:
           LISTING_URL: '${{ github.event.inputs.listing_url || github.event.client_payload.url }}'
         run: |
           cd process
-          python listing_scraper.py --url "$LISTING_URL" --output scraped_data.json
+          python enhanced_scraper.py --url "$LISTING_URL" --output enhanced_data.json
           
-      - name: Process scraped data
+      - name: Generate analytics and charts
+        run: |
+          cd process
+          python analytics_generator.py --input enhanced_data.json --output-dir analytics
+          
+      - name: Build enhanced report
         env:
           CLIENT_EMAIL: '${{ github.event.inputs.client_email || github.event.client_payload.client || 'realtor@example.com' }}'
         run: |
           cd process
-          python mls_processor.py \
-            --data-file scraped_data.json \
+          python report_enhancer.py \
+            --data enhanced_data.json \
+            --analytics-dir analytics \
             --client "$CLIENT_EMAIL" \
-            --output-dir outputs
+            --output reports/enhanced_report.html
           
-      - name: Generate client report
+      - name: Download property images
         run: |
           cd process
-          python report_builder.py \
-            --input-dir outputs \
-            --output-dir reports
-            
-      - name: Upload results
+          python image_processor.py \
+            --data enhanced_data.json \
+            --output-dir images
+          
+      - name: Upload all results
         uses: actions/upload-artifact@v3
         with:
-          name: listing-content
+          name: enhanced-analysis
           path: |
-            scraped_data.json
-            outputs/
+            enhanced_data.json
+            analytics/
             reports/
+            images/
+          
+      - name: Commit results to repository
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add .
+          git commit -m "Add enhanced analysis for property" || echo "No changes"
+          git push || echo "Push failed"
