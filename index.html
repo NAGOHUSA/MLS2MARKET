@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Client Reports - RealtorAI</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .reports-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .reports-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .report-card {
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 20px;
+            transition: all 0.3s;
+        }
+        
+        .report-card:hover {
+            border-color: #4299e1;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .report-address {
+            font-weight: bold;
+            color: #2d3748;
+            margin-bottom: 10px;
+        }
+        
+        .report-price {
+            color: #38a169;
+            font-size: 1.2em;
+            margin-bottom: 15px;
+        }
+        
+        .report-meta {
+            font-size: 0.9em;
+            color: #718096;
+            margin-bottom: 15px;
+        }
+        
+        .report-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .report-actions button {
+            flex: 1;
+            padding: 8px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .view-report {
+            background: #4299e1;
+            color: white;
+        }
+        
+        .download-pdf {
+            background: #48bb78;
+            color: white;
+        }
+        
+        .no-reports {
+            text-align: center;
+            padding: 60px 20px;
+            color: #718096;
+        }
+        
+        .generate-cta {
+            background: linear-gradient(135deg, #f6f9fc 0%, #edf2f7 100%);
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+            margin: 40px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📄 Client Reports</h1>
+            <p>View and manage generated property reports</p>
+            <nav>
+                <a href="index.html">← Dashboard</a>
+                <a href="mls-upload.html">Upload New MLS</a>
+            </nav>
+        </header>
+
+        <main class="reports-container">
+            <div class="generate-cta">
+                <h2>No Reports Yet</h2>
+                <p>Upload MLS data to generate your first client report</p>
+                <a href="mls-upload.html" class="button" style="display: inline-block; margin-top: 15px;">
+                    Generate First Report
+                </a>
+            </div>
+
+            <!-- Sample Reports (hidden by default, shown after generation) -->
+            <div id="sampleReports" style="display: none;">
+                <h2>Generated Reports</h2>
+                <div class="reports-grid">
+                    <div class="report-card">
+                        <div class="report-address">456 Oak Lane, Springfield, IL</div>
+                        <div class="report-price">$375,000</div>
+                        <div class="report-meta">
+                            <div>4 BR • 3 BA • 2,200 sqft</div>
+                            <div>Generated: Today</div>
+                        </div>
+                        <div class="report-actions">
+                            <button class="view-report" onclick="viewSampleReport()">View Report</button>
+                            <button class="download-pdf" onclick="downloadReport()">Download</button>
+                        </div>
+                    </div>
+                    
+                    <div class="report-card">
+                        <div class="report-address">789 Pine Road, Greenville, SC</div>
+                        <div class="report-price">$525,000</div>
+                        <div class="report-meta">
+                            <div>5 BR • 3.5 BA • 3,200 sqft</div>
+                            <div>Generated: 2 days ago</div>
+                        </div>
+                        <div class="report-actions">
+                            <button class="view-report" onclick="viewSampleReport()">View Report</button>
+                            <button class="download-pdf" onclick="downloadReport()">Download</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Report Preview Modal -->
+            <div id="reportModal" class="modal" style="display: none;">
+                <div class="modal-content" style="max-width: 900px; height: 80vh;">
+                    <iframe id="reportFrame" style="width: 100%; height: 100%; border: none; border-radius: 8px;"></iframe>
+                    <div style="text-align: center; margin-top: 15px;">
+                        <button onclick="closeModal()" style="padding: 10px 20px; background: #718096; color: white; border: none; border-radius: 5px;">Close</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <p>Reports generated 100% free using public data and templates</p>
+            <p>Upgrade for branded reports and advanced analytics</p>
+        </footer>
+    </div>
+
+    <script>
+        // Check if we have reports (simulate checking GitHub)
+        function checkForReports() {
+            // In production, would check GitHub for generated reports
+            // For demo, show sample after first "generation"
+            if (localStorage.getItem('hasGeneratedReport')) {
+                document.getElementById('sampleReports').style.display = 'block';
+                document.querySelector('.generate-cta').style.display = 'none';
+            }
+        }
+        
+        function viewSampleReport() {
+            // Create a sample report for demo
+            const sampleReport = `<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: sans-serif; padding: 40px; max-width: 800px; margin: 0 auto; }
+        .header { text-align: center; border-bottom: 3px solid #2c5282; padding-bottom: 20px; margin-bottom: 30px; }
+        .address { font-size: 1.8em; color: #2c5282; }
+        .price { font-size: 1.5em; color: #38a169; font-weight: bold; margin: 10px 0; }
+        .section { margin: 25px 0; padding: 20px; background: #f7fafc; border-radius: 8px; }
+        .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin: 20px 0; }
+        .stat { text-align: center; padding: 15px; background: white; border-radius: 6px; }
+        .stat-value { font-size: 1.3em; font-weight: bold; color: #2c5282; }
+        .footer { text-align: center; margin-top: 40px; color: #718096; font-size: 0.9em; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="address">456 Oak Lane, Springfield, IL</div>
+        <div class="price">$375,000</div>
+        <p>Property Report • Generated by RealtorAI</p>
+    </div>
+    
+    <div class="section">
+        <h2>Property Overview</h2>
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-value">4</div>
+                <div>Bedrooms</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">3</div>
+                <div>Bathrooms</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">2,200</div>
+                <div>Square Feet</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="section">
+        <h2>Property Features</h2>
+        <ul>
+            <li>Updated kitchen with granite countertops</li>
+            <li>Hardwood floors throughout main level</li>
+            <li>Finished basement with extra living space</li>
+            <li>Large deck overlooking private backyard</li>
+            <li>Two-car garage with storage</li>
+        </ul>
+    </div>
+    
+    <div class="section">
+        <h2>School Information</h2>
+        <p><strong>District:</strong> Springfield Public Schools</p>
+        <ul>
+            <li>Oakwood Elementary School (0.5 miles)</li>
+            <li>Springfield Middle School (1.2 miles)</li>
+            <li>Springfield High School (1.5 miles)</li>
+        </ul>
+    </div>
+    
+    <div class="footer">
+        <p>This report was generated 100% free using public MLS data</p>
+        <p>Upgrade to RealtorAI Pro for enhanced reports with market analytics</p>
+    </div>
+</body>
+</html>`;
+            
+            const blob = new Blob([sampleReport], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            document.getElementById('reportFrame').src = url;
+            document.getElementById('reportModal').style.display = 'block';
+        }
+        
+        function closeModal() {
+            document.getElementById('reportModal').style.display = 'none';
+            document.getElementById('reportFrame').src = '';
+        }
+        
+        function downloadReport() {
+            alert('In production, this would download the report as PDF.\n\nFree tier includes HTML reports only.');
+        }
+        
+        // Initialize
+        checkForReports();
+        
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('reportModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        };
+    </script>
+</body>
+</html>
