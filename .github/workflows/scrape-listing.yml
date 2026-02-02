@@ -1,0 +1,62 @@
+name: Scrape Real Estate Listing
+on:
+  workflow_dispatch:
+    inputs:
+      listing_url:
+        description: 'URL of real estate listing'
+        required: true
+      client_email:
+        description: 'Client email for report'
+        required: false
+  repository_dispatch:
+    types: [scrape-listing]
+
+jobs:
+  scrape-and-process:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+          
+      - name: Install scraping dependencies
+        run: |
+          cd process
+          pip install -r requirements.txt
+          
+      - name: Scrape listing data
+        env:
+          LISTING_URL: '${{ github.event.inputs.listing_url || github.event.client_payload.url }}'
+        run: |
+          cd process
+          python listing_scraper.py --url "$LISTING_URL" --output scraped_data.json
+          
+      - name: Process scraped data
+        env:
+          CLIENT_EMAIL: '${{ github.event.inputs.client_email || github.event.client_payload.client || 'realtor@example.com' }}'
+        run: |
+          cd process
+          python mls_processor.py \
+            --data-file scraped_data.json \
+            --client "$CLIENT_EMAIL" \
+            --output-dir outputs
+          
+      - name: Generate client report
+        run: |
+          cd process
+          python report_builder.py \
+            --input-dir outputs \
+            --output-dir reports
+            
+      - name: Upload results
+        uses: actions/upload-artifact@v3
+        with:
+          name: listing-content
+          path: |
+            scraped_data.json
+            outputs/
+            reports/
