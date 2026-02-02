@@ -1,0 +1,30 @@
+{
+    "app_name": "RealtorAI",
+    "version": "1.0.0",
+    "free_mode": true,
+    "mls_sources": [
+        "Copy-paste from MLS system",
+        "JSON export",
+        "Text extraction",
+        "Sample data"
+    ],
+    "output_formats": [
+        "Listing description",
+        "Social media posts",
+        "Email campaigns",
+        "Client reports"
+    ],
+    "free_features": [
+        "No API costs",
+        "No hosting fees",
+        "Unlimited basic reports",
+        "Community templates"
+    ],
+    "upgrade_features": [
+        "Premium AI quality",
+        "White-label branding",
+        "PDF export",
+        "Market analytics",
+        "Priority processing"
+    ]
+}
