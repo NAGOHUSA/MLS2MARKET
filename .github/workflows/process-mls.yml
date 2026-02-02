@@ -1,0 +1,60 @@
+name: Process MLS Data
+on:
+  workflow_dispatch:
+    inputs:
+      mls_data:
+        description: 'MLS JSON data or listing URL'
+        required: true
+      client_email:
+        description: 'Client email for report'
+        required: false
+  repository_dispatch:
+    types: [process-mls]
+
+jobs:
+  process-mls:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+          
+      - name: Install free dependencies
+        run: |
+          cd process
+          pip install -r requirements.txt
+          
+      - name: Process MLS data
+        run: |
+          cd process
+          python mls_processor.py \
+            --data '${{ github.event.inputs.mls_data || github.event.client_payload.data }}' \
+            --client '${{ github.event.inputs.client_email || github.event.client_payload.client || 'realtor@example.com' }}' \
+            --output-dir outputs
+          
+      - name: Generate client report
+        run: |
+          cd process
+          python report_builder.py \
+            --input-dir outputs \
+            --output-dir reports
+            
+      - name: Upload results
+        uses: actions/upload-artifact@v3
+        with:
+          name: realtor-content
+          path: |
+            outputs/
+            reports/
+          
+      - name: Commit to repo
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add outputs/ reports/
+          git commit -m "Add MLS content for ${{ github.event.inputs.client_email || 'client' }}" || echo "No changes"
+          git push || echo "Push failed"
