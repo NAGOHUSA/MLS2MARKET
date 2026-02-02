@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scrape Listing - RealtorAI</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .upload-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 30px;
+        }
+        
+        .url-input-section {
+            background: #f7fafc;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+        
+        .url-input {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.1em;
+            border: 2px solid #cbd5e0;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+        
+        .url-input:focus {
+            outline: none;
+            border-color: #4299e1;
+            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+        }
+        
+        .supported-sites {
+            margin: 20px 0;
+            padding: 15px;
+            background: #e6fffa;
+            border-radius: 8px;
+            border-left: 4px solid #38b2ac;
+        }
+        
+        .site-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .site-icon {
+            text-align: center;
+            padding: 10px;
+            background: white;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .process-button {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #4299e1 0%, #2c5282 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 20px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .process-button:hover {
+            opacity: 0.9;
+        }
+        
+        .spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .processing-steps {
+            display: none;
+            margin: 30px 0;
+            padding: 25px;
+            background: #fffaf0;
+            border-radius: 10px;
+            border: 1px solid #ed8936;
+        }
+        
+        .step {
+            display: flex;
+            align-items: center;
+            margin: 15px 0;
+            padding: 12px;
+            background: white;
+            border-radius: 6px;
+            border-left: 4px solid #cbd5e0;
+        }
+        
+        .step.active {
+            border-left-color: #4299e1;
+            background: #ebf8ff;
+        }
+        
+        .step.completed {
+            border-left-color: #48bb78;
+            background: #f0fff4;
+        }
+        
+        .step-icon {
+            margin-right: 15px;
+            font-size: 1.5em;
+        }
+        
+        .results {
+            display: none;
+            margin-top: 30px;
+            padding: 25px;
+            background: #f0fff4;
+            border-radius: 10px;
+            border: 2px solid #48bb78;
+        }
+        
+        .scraped-data {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .data-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .data-item {
+            padding: 15px;
+            background: #f7fafc;
+            border-radius: 6px;
+            border-left: 3px solid #4299e1;
+        }
+        
+        .data-label {
+            font-size: 0.9em;
+            color: #718096;
+            margin-bottom: 5px;
+        }
+        
+        .data-value {
+            font-weight: bold;
+            color: #2d3748;
+        }
+        
+        .content-previews {
+            margin-top: 30px;
+        }
+        
+        .preview-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid #ed8936;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        
+        .preview-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .view-toggle {
+            background: #edf2f7;
+            border: none;
+            padding: 5px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            color: #4a5568;
+        }
+        
+        .preview-content {
+            max-height: 200px;
+            overflow-y: auto;
+            padding: 15px;
+            background: #fafafa;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 0.9em;
+            line-height: 1.5;
+            white-space: pre-wrap;
+        }
+        
+        .actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 25px;
+            flex-wrap: wrap;
+        }
+        
+        .action-button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            min-width: 150px;
+        }
+        
+        .view-report {
+            background: #4299e1;
+            color: white;
+        }
+        
+        .download-all {
+            background: #48bb78;
+            color: white;
+        }
+        
+        .new-listing {
+            background: #ed8936;
+            color: white;
+        }
+        
+        .manual-input {
+            margin-top: 40px;
+            padding: 25px;
+            background: #faf5ff;
+            border-radius: 10px;
+            border: 1px solid #d6bcfa;
+        }
+        
+        .manual-toggle {
+            background: none;
+            border: none;
+            color: #805ad5;
+            cursor: pointer;
+            text-decoration: underline;
+            font-size: 0.9em;
+        }
+        
+        .manual-form {
+            display: none;
+            margin-top: 20px;
+        }
+        
+        .manual-textarea {
+            width: 100%;
+            height: 150px;
+            padding: 15px;
+            border: 1px solid #d6bcfa;
+            border-radius: 6px;
+            font-family: monospace;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🌐 Scrape Real Estate Listing</h1>
+            <p>Paste any property listing URL to generate marketing content</p>
+            <nav>
+                <a href="index.html">← Dashboard</a>
+                <a href="report-viewer.html">View Reports</a>
+            </nav>
+        </header>
+
+        <main class="upload-container">
+            <!-- URL Input Section -->
+            <div class="url-input-section">
+                <h2>Enter Listing URL</h2>
+                <p>Paste a link from any real estate website:</p>
+                
+                <input type="url" 
+                       id="listingUrl" 
+                       class="url-input" 
+                       placeholder="https://www.zillow.com/homedetails/123-Main-St...">
+                
+                <div class="supported-sites">
+                    <strong>Supported Sites:</strong>
+                    <div class="site-grid">
+                        <div class="site-icon">🏠 Zillow</div>
+                        <div class="site-icon">🔴 Redfin</div>
+                        <div class="site-icon">📊 Realtor.com</div>
+                        <div class="site-icon">🏘️ Trulia</div>
+                        <div class="site-icon">🌐 MLS Sites</div>
+                        <div class="site-icon">🏢 Broker Sites</div>
+                    </div>
+                </div>
+                
+                <div class="client-info">
+                    <h3>Client Information (Optional)</h3>
+                    <input type="email" 
+                           id="clientEmail" 
+                           class="url-input" 
+                           placeholder="client@example.com"
+                           style="font-size: 1em; padding: 12px;">
+                </div>
+                
+                <button class="process-button" onclick="scrapeListing()">
+                    <span class="spinner" id="spinner"></span>
+                    🚀 Scrape & Generate Content
+                </button>
+                
+                <p style="text-align: center; color: #718096; font-size: 0.9em;">
+                    Uses 100% free web scraping • No API costs • Your data stays private
+                </p>
+            </div>
+
+            <!-- Processing Steps -->
+            <div class="processing-steps" id="processingSteps">
+                <h3>⚡ Processing Your Listing...</h3>
+                <div class="step" id="step1">
+                    <div class="step-icon">🌐</div>
+                    <div>
+                        <strong>Connecting to listing page</strong>
+                        <p>Fetching data from website...</p>
+                    </div>
+                </div>
+                <div class="step" id="step2">
+                    <div class="step-icon">🔍</div>
+                    <div>
+                        <strong>Extracting property data</strong>
+                        <p>Finding address, price, and details...</p>
+                    </div>
+                </div>
+                <div class="step" id="step3">
+                    <div class="step-icon">🤖</div>
+                    <div>
+                        <strong>Generating marketing content</strong>
+                        <p>Creating descriptions and social posts...</p>
+                    </div>
+                </div>
+                <div class="step" id="step4">
+                    <div class="step-icon">📄</div>
+                    <div>
+                        <strong>Building client report</strong>
+                        <p>Compiling professional report...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Results Section -->
+            <div class="results" id="resultsSection">
+                <h2>🎉 Content Generated Successfully!</h2>
+                <p>Here's what we found and created:</p>
+                
+                <!-- Scraped Data -->
+                <div class="scraped-data">
+                    <h3>📊 Extracted Property Data</h3>
+                    <div class="data-grid" id="propertyData">
+                        <!-- Filled by JavaScript -->
+                    </div>
+                </div>
+
+                <!-- Generated Content Previews -->
+                <div class="content-previews">
+                    <h3>📝 Generated Marketing Materials</h3>
+                    
+                    <div class="preview-card">
+                        <div class="preview-header">
+                            <h4>🏠 Listing Description</h4>
+                            <button class="view-toggle" onclick="togglePreview('listingDesc')">Show Preview</button>
+                        </div>
+                        <div class="preview-content" id="listingDesc" style="display: none;">
+                            Welcome to this stunning property! Located in a desirable neighborhood, this home features...
+                            
+                            • 4 bedrooms and 2.5 bathrooms
+                            • 2,100 square feet of living space
+                            • Updated kitchen with granite countertops
+                            • Spacious backyard perfect for entertaining
+                            • Excellent school district
+                            
+                            Schedule your showing today!
+                        </div>
+                    </div>
+                    
+                    <div class="preview-card">
+                        <div class="preview-header">
+                            <h4>📱 Social Media Posts</h4>
+                            <button class="view-toggle" onclick="togglePreview('socialPosts')">Show Preview</button>
+                        </div>
+                        <div class="preview-content" id="socialPosts" style="display: none;">
+                            🏡 NEW LISTING ALERT! 🏡
+                            
+                            Just listed: Beautiful 4BR/2.5BA home in great neighborhood!
+                            ✅ 2,100 sqft
+                            ✅ Updated kitchen
+                            ✅ Large backyard
+                            ✅ Excellent schools
+                            
+                            Price: $425,000
+                            
+                            DM for details or to schedule a tour!
+                            
+                            #NewListing #RealEstate #HomeForSale #DreamHome
+                        </div>
+                    </div>
+                    
+                    <div class="preview-card">
+                        <div class="preview-header">
+                            <h4>📧 Email Blast</h4>
+                            <button class="view-toggle" onclick="togglePreview('emailBlast')">Show Preview</button>
+                        </div>
+                        <div class="preview-content" id="emailBlast" style="display: none;">
+                            Subject: New Listing Alert - Beautiful 4BR Home in Great Neighborhood
+                            
+                            Hi [Client Name],
+                            
+                            I'm excited to share a new listing that just hit the market!
+                            
+                            Price: $425,000
+                            Beds: 4 | Baths: 2.5 | SQFT: 2,100
+                            
+                            This stunning home features...
+                            
+                            Schedule your private tour today!
+                            
+                            Best regards,
+                            [Your Name]
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="actions">
+                    <button class="action-button view-report" onclick="viewGeneratedReport()">
+                        👁️ View Client Report
+                    </button>
+                    <button class="action-button download-all" onclick="downloadAllContent()">
+                        📥 Download All Files
+                    </button>
+                    <button class="action-button new-listing" onclick="processAnother()">
+                        ➕ Process Another Listing
+                    </button>
+                </div>
+                
+                <div style="margin-top: 25px; padding: 15px; background: #fffaf0; border-radius: 6px;">
+                    <p style="margin: 0; color: #744210; font-size: 0.9em;">
+                        <strong>Note:</strong> This is a demo simulation. In production, we would:
+                        1. Actually scrape the URL you provide
+                        2. Generate unique content based on actual property data
+                        3. Save all files to your GitHub repository
+                        4. Email you the results
+                    </p>
+                </div>
+            </div>
+
+            <!-- Manual Input Fallback -->
+            <div class="manual-input">
+                <h3>📋 Alternative: Manual Data Input</h3>
+                <p>If scraping doesn't work or you have MLS text data:</p>
+                <button class="manual-toggle" onclick="toggleManualInput()">
+                    Show manual input form
+                </button>
+                
+                <div class="manual-form" id="manualForm">
+                    <textarea class="manual-textarea" id="manualMLS" placeholder="Paste MLS data here...">
+Address: 123 Main St, Anytown, USA
+Price: $450,000
+Beds: 3
+Baths: 2.5
+SQFT: 1850
+Year Built: 1998
+MLS#: ABC123456</textarea>
+                    <button class="process-button" style="padding: 12px; font-size: 1em;" onclick="processManualData()">
+                        Process Manual Data
+                    </button>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <p>Powered by free web scraping • No API costs • Your data stays in your GitHub repository</p>
+            <p>Upgrade to Pro for better scraping accuracy and more content formats</p>
+        </footer>
+    </div>
+
+    <script>
+        // Sample property data for demo
+        const sampleProperties = [
+            {
+                address: "456 Oak Lane, Springfield, IL",
+                price: 375000,
+                beds: 4,
+                baths: 3,
+                sqft: 2200,
+                year: 2005,
+                lot: "0.3 acres",
+                type: "Single Family Home",
+                mls: "XYZ789012"
+            },
+            {
+                address: "789 Pine Road, Greenville, SC",
+                price: 525000,
+                beds: 5,
+                baths: 3.5,
+                sqft: 3200,
+                year: 2015,
+                lot: "0.5 acres",
+                type: "Single Family Home",
+                mls: "DEF456789"
+            },
+            {
+                address: "123 Maple Ave, Boulder, CO",
+                price: 895000,
+                beds: 3,
+                baths: 2,
+                sqft: 1800,
+                year: 1978,
+                lot: "0.25 acres",
+                type: "Mountain Home",
+                mls: "GHI123456"
+            }
+        ];
+
+        let currentStep = 0;
+        let currentProperty = null;
+
+        function scrapeListing() {
+            const url = document.getElementById('listingUrl').value;
+            const clientEmail = document.getElementById('clientEmail').value || 'realtor@example.com';
+            
+            if (!url) {
+                alert('Please enter a listing URL');
+                return;
+            }
+            
+            // Validate URL
+            if (!url.startsWith('http')) {
+                alert('Please enter a valid URL starting with http:// or https://');
+                return;
+            }
+            
+            // Show processing
+            document.getElementById('processingSteps').style.display = 'block';
+            document.getElementById('resultsSection').style.display = 'none';
+            document.getElementById('spinner').style.display = 'inline-block';
+            document.querySelector('.process-button').disabled = true;
+            
+            // Reset steps
+            currentStep = 0;
+            for (let i = 1; i <= 4; i++) {
+                document.getElementById(`step${i}`).className = 'step';
+            }
+            
+            // Simulate processing steps
+            simulateStep(1, 1000);
+            simulateStep(2, 2500);
+            simulateStep(3, 4000);
+            simulateStep(4, 5500);
+            
+            // Pick a random sample property for demo
+            currentProperty = sampleProperties[Math.floor(Math.random() * sampleProperties.length)];
+            
+            // In production, this would call GitHub Actions API:
+            // fetch('https://api.github.com/repos/YOUR_USER/YOUR_REPO/dispatches', {
+            //     method: 'POST',
+            //     headers: {
+            //         'Authorization': 'token YOUR_GITHUB_TOKEN',
+            //         'Accept': 'application/vnd.github.v3+json'
+            //     },
+            //     body: JSON.stringify({
+            //         event_type: 'scrape-listing',
+            //         client_payload: {
+            //             url: url,
+            //             client: clientEmail
+            //         }
+            //     })
+            // });
+            
+            // Show results after simulation
+            setTimeout(() => {
+                document.getElementById('processingSteps').style.display = 'none';
+                document.getElementById('resultsSection').style.display = 'block';
+                document.getElementById('spinner').style.display = 'none';
+                document.querySelector('.process-button').disabled = false;
+                
+                // Display scraped data
+                displayPropertyData(currentProperty);
+                
+                // Store that we've generated a report
+                localStorage.setItem('hasGeneratedReport', 'true');
+            }, 6500);
+        }
+        
+        function simulateStep(stepNumber, delay) {
+            setTimeout(() => {
+                document.getElementById(`step${stepNumber}`).className = 'step active';
+                currentStep = stepNumber;
+                
+                // Mark previous steps as completed
+                for (let i = 1; i < stepNumber; i++) {
+                    document.getElementById(`step${i}`).className = 'step completed';
+                }
+            }, delay);
+        }
+        
+        function displayPropertyData(property) {
+            const container = document.getElementById('propertyData');
+            const dataPoints = [
+                { label: 'Address', value: property.address },
+                { label: 'Price', value: `$${property.price.toLocaleString()}` },
+                { label: 'Bedrooms', value: property.beds },
+                { label: 'Bathrooms', value: property.baths },
+                { label: 'Square Feet', value: property.sqft.toLocaleString() },
+                { label: 'Year Built', value: property.year },
+                { label: 'Lot Size', value: property.lot },
+                { label: 'Property Type', value: property.type },
+                { label: 'MLS ID', value: property.mls }
+            ];
+            
+            container.innerHTML = dataPoints.map(item => `
+                <div class="data-item">
+                    <div class="data-label">${item.label}</div>
+                    <div class="data-value">${item.value}</div>
+                </div>
+            `).join('');
+        }
+        
+        function togglePreview(elementId) {
+            const element = document.getElementById(elementId);
+            const button = event.target;
+            
+            if (element.style.display === 'none') {
+                element.style.display = 'block';
+                button.textContent = 'Hide Preview';
+            } else {
+                element.style.display = 'none';
+                button.textContent = 'Show Preview';
+            }
+        }
+        
+        function viewGeneratedReport() {
+            // In production, this would open the actual generated report
+            // For demo, open a sample report
+            window.open('report-viewer.html', '_blank');
+        }
+        
+        function downloadAllContent() {
+            alert('In production, this would download:\n\n' +
+                  '• listing_description.md\n' +
+                  '• social_posts.md\n' +
+                  '• email_blast.md\n' +
+                  '• client_report.html\n\n' +
+                  'All generated from the scraped listing data.');
+        }
+        
+        function processAnother() {
+            document.getElementById('listingUrl').value = '';
+            document.getElementById('clientEmail').value = '';
+            document.getElementById('resultsSection').style.display = 'none';
+            document.getElementById('listingUrl').focus();
+            
+            // Hide all previews
+            ['listingDesc', 'socialPosts', 'emailBlast'].forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.style.display = 'none';
+                }
+                const button = element?.previousElementSibling?.querySelector('.view-toggle');
+                if (button) {
+                    button.textContent = 'Show Preview';
+                }
+            });
+        }
+        
+        function toggleManualInput() {
+            const form = document.getElementById('manualForm');
+            const button = event.target;
+            
+            if (form.style.display === 'none' || !form.style.display) {
+                form.style.display = 'block';
+                button.textContent = 'Hide manual input form';
+            } else {
+                form.style.display = 'none';
+                button.textContent = 'Show manual input form';
+            }
+        }
+        
+        function processManualData() {
+            const manualData = document.getElementById('manualMLS').value;
+            if (!manualData.trim()) {
+                alert('Please enter MLS data');
+                return;
+            }
+            
+            alert('Processing manual data...\n\nIn production, this would:\n' +
+                  '1. Parse your MLS text\n' +
+                  '2. Generate marketing content\n' +
+                  '3. Create client report\n\n' +
+                  'For now, use the URL scraping feature above.');
+        }
+        
+        // Example URLs for quick testing
+        function insertExampleUrl(exampleNumber) {
+            const examples = [
+                'https://www.zillow.com/homedetails/123-Main-St-Anytown-USA/123456789_zpid/',
+                'https://www.redfin.com/CA/San-Francisco/456-Oak-St-94110/home/12345678',
+                'https://www.realtor.com/realestateandhomes-detail/789-Pine-Rd_Greenville_SC_12345_M12345-12345'
+            ];
+            
+            document.getElementById('listingUrl').value = examples[exampleNumber - 1];
+        }
+        
+        // Add quick example buttons
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlInputSection = document.querySelector('.url-input-section');
+            const quickExamples = document.createElement('div');
+            quickExamples.innerHTML = `
+                <div style="margin: 15px 0; font-size: 0.9em; color: #718096;">
+                    <strong>Quick test:</strong>
+                    <button onclick="insertExampleUrl(1)" style="margin: 0 5px; padding: 5px 10px; background: #edf2f7; border: 1px solid #cbd5e0; border-radius: 4px; cursor: pointer;">Zillow Example</button>
+                    <button onclick="insertExampleUrl(2)" style="margin: 0 5px; padding: 5px 10px; background: #edf2f7; border: 1px solid #cbd5e0; border-radius: 4px; cursor: pointer;">Redfin Example</button>
+                    <button onclick="insertExampleUrl(3)" style="margin: 0 5px; padding: 5px 10px; background: #edf2f7; border: 1px solid #cbd5e0; border-radius: 4px; cursor: pointer;">Realtor.com Example</button>
+                </div>
+            `;
+            urlInputSection.insertBefore(quickExamples, urlInputSection.querySelector('.supported-sites'));
+        });
+    </script>
+</body>
+</html>
