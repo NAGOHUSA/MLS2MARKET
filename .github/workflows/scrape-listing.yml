@@ -44,7 +44,7 @@ jobs:
           
       - name: Build enhanced report
         env:
-          CLIENT_EMAIL: '${{ github.event.inputs.client_email || github.event.client_payload.client || 'realtor@example.com' }}'
+          CLIENT_EMAIL: ${{ github.event.inputs.client_email || github.event.client_payload.client || 'realtor@example.com' }}
         run: |
           cd process
           python report_enhancer.py \
